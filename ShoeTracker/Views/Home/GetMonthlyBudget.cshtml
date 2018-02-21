@@ -1,0 +1,51 @@
+﻿@model ShoeTracker.Models.HomePageModel
+@using System.Globalization;
+<br />
+<div class="container">
+    <h2>Food</h2>
+    <div class="row">
+        <div class="col-lg-10">
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" aria-valuenow="@Model.MonthlyBudget.FoodPercentage" aria-valuemin="0" aria-valuemax="550" style="width:@Model.MonthlyBudget.FoodPercentage%">
+                    $@Model.MonthlyBudget.FoodDollarAmount.00
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2">
+            <p>$550.00</p>
+        </div>
+    </div>
+</div>
+<br />
+<div class="container">
+    <h2>Shopping</h2>
+    <div class="row">
+        <div class="col-lg-10">
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" aria-valuenow="@Model.MonthlyBudget.ShoppingPercentage" aria-valuemin="0" aria-valuemax="200" style="width:@Model.MonthlyBudget.ShoppingPercentage%">
+                    $@Model.MonthlyBudget.ShoppingDollarAmount.00
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2">
+            <p>$200.00</p>
+        </div>
+    </div>
+</div>
+<br />
+<div class="container">
+    <h2>Gas</h2>
+    <div class="row">
+        <div class="col-lg-10">
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" aria-valuenow="@Model.MonthlyBudget.GasPercentage" aria-valuemin="0" aria-valuemax="160" style="width:@Model.MonthlyBudget.GasPercentage%">
+                    $@Model.MonthlyBudget.GasDollarAmount.00
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2">
+            <p>$160.00</p>
+        </div>
+    </div>
+</div>
+

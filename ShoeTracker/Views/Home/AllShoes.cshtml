@@ -1,0 +1,186 @@
+﻿@using ShoeProject.Domain.DTO
+@using ShoeTracker.Models
+@model ShoeTracker.Models.HomePageModel
+
+@{
+    ViewBag.Title = "AllShoes";
+}
+<style>
+    .table>tbody>tr.no-border>td,
+    .table>tbody>tr.no-border>th {
+        border-top: none;
+    }
+</style>
+<br/>
+<div class="row">
+    <div class="col-xs-6 col-lg-3">
+        @Html.DropDownList("ChildName", Model.NameList, "Select A Name", new { id = "name", @class = "form-control" })
+    </div>
+    <div class="col-xs-offset-6 col-xs-6 col-lg-3">
+        @Ajax.ActionLink("Table View", "ShoeTrackerHistory", new AjaxOptions()) |
+        @Html.ActionLink("Graph View", "ShoeTrackerHistory")
+    </div>
+</div>
+<br/>
+<table id="myTable" class="table" style="overflow: auto">
+    <tr>
+        <th> Name </th>
+        <th> Shoe </th>
+        <th> Size </th>
+        <th> Purchased </th>
+        <th> Price </th>
+        <th> Store </th>
+    </tr>
+    @foreach (ShoeTrackerDto shoe in Model.ShoeTrackerDtoList)
+    {
+        <tr style="overflow-x: auto; background-color: #F0F8FF">
+            <td>@shoe.ChildName</td>
+            <td>@shoe.Description</td>
+            <td>@shoe.Size</td>
+            <td>@shoe.Date.ToString("d")</td>
+            <td>$@shoe.Price</td>
+            <td>@shoe.Link</td>
+        </tr>
+        <tr class="no-border second-row">
+            <td colspan="4">
+                <b>Options:</b> &nbsp;@Html.ActionLink("Edit", "Edit", new { id = shoe.Id, name = shoe.ChildName }) |
+                @*@Html.ActionLink(null,null, new { id = shoe.Id, isEdit = true }, new {*@
+                <a href="#" class="delete-trigger" data="@shoe.Id" data-toggle="modal" , data-target="#deleteModal">Delete</a> |
+                <a href="#" class="receipt-trigger" data="@shoe.Id" data-toggle="modal" data-target="#receiptModal">Receipt</a>
+            </td>
+        </tr>
+    }
+</table>
+<div id="receiptModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Receipt</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title col-xs-offset-3">Delete</h4>
+            </div>
+            <div class="delete-info modal-body">
+                <h5>
+                    Are you sure you want to delete this item?
+                </h5>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="delete btn btn-danger" data-dismiss="modal">Delete</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document)
+        .ready(function () {
+            $('.receipt-trigger')
+                .on('click',
+                    function () {
+                        var id = $(this).attr("data");
+                        console.log(id);
+                        $.ajax({
+                            type: 'POST',
+                            data: {
+                                Id: id
+                            },
+                            url: '@Url.Action("GetReceipt", "Home")',
+                            success: function (result) {
+                                $('#receiptModal').show();
+                                $('.modal-body').html(result);
+                            },
+                            error: function (request, status, error) {
+                                console.log(error);
+                            }
+                        });
+                    });
+        });
+    $(document)
+    .ready(function () {
+        $('.delete')
+            .on('click',
+                function () {
+                    debugger;
+                    var id = $(this).attr("data");
+                    console.log(id);
+                    $.ajax({
+                        type: 'POST',
+                        data: {
+                            Id: id
+                        },
+                        url: '@Url.Action("Delete", "Home")',
+                        success: function(redirect) {
+                            redirectToIndex(redirect);
+                        },
+                        error: function (request, status, error) {
+                            console.log(error);
+                        }
+                    });
+
+                    function redirectToIndex(redirect) {
+                        debugger;
+                        $.ajax({
+                            type: "GET",
+                            data: {
+                                wasRedirected: redirect
+                            },
+                            url: '@Url.Action("Index", "Home")',
+                            success: function (data) {
+                                $('body').html(data);
+                            },
+                            error: function (xhr, status, error) { alert(error); }
+                        });
+                    }
+                });
+    });
+
+    $('.delete-trigger')
+    .on('click',
+        function () {
+            var id = $(this).attr("data");
+            $('.delete').attr("data", id);
+        });
+
+    function myFunction() {
+        // Declare variables
+        var td, i;
+        var input = document.getElementById("child-name");
+        var filter = input.value.toUpperCase();
+        var table = document.getElementById("myTable");
+        var tr = table.getElementsByTagName("tr");
+
+        // Loop through all table rows, and hide those who don't match the search query
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[0];
+            if (td) {
+                if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                    tr[i++].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>

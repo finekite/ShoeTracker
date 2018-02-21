@@ -1,0 +1,217 @@
+﻿@model ShoeTracker.Models.HomePageModel
+
+@{
+    ViewBag.Title = "Index";
+}
+<div class="container">
+    <div class="row text-center">
+        <div class="col-lg-11">
+            <h1>Shoe Tracker</h1>
+        </div>
+    </div>
+    <ul class="nav nav-tabs" id="myTab">
+        <li class="active"><a data-toggle="tab" href="#home">Home</a></li>
+        <li class="menu11"><a data-toggle="tab" href="#menu1">Shoe Purchase History</a></li>
+        <li class="monthly-budget"><a data-toggle="tab" href="#monthly-budget">Monthly Budget</a></li>
+    </ul>
+    <div class="tab-content">
+        <div id="home" class="tab-pane fade in active">
+            <div id="success-message"></div>
+            <div class="row">
+                <div class="col-md-3 col-lg-2">
+                    <h5>Choose a name:</h5>
+                    @Html.DropDownList("ChildName", Model.NameList, new { id = "name", @class = "form-control" })
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-3 col-lg-2">
+                    <h5>Choose a shoe type:</h5>
+                    @Html.DropDownList("ShoeTypeId", Model.ShoeTypeList, new { id = "shoe-type", @class = "form-control" })
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-3 col-lg-2">
+                    <h5>Price:</h5>
+                    @Html.TextBoxFor(m => m.ShoeTrackerDto.Price, new { id = "price", @class = "form-control" })
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-3 col-lg-2">
+                    <h5>Size:</h5>
+                    @Html.TextBoxFor(m => m.ShoeTrackerDto.Size, new { id = "size", @class = "form-control" })
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-3 col-lg-2">
+                    <h5>Link or Store (optional):</h5>
+                    @Html.TextBoxFor(m => m.ShoeTrackerDto.Link, new { id = "link", @class = "form-control" })
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-3 col-lg-2">
+                    <h5>Date:</h5>
+                    @Html.TextBoxFor(m => m.ShoeTrackerDto.Date, "{0:yyyy-MM-dd}", new { id = "date", type = "date", @class = "form-control" })
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-3 col-lg-2">
+                    <h5>Receipt</h5>
+                    <label class="btn btn-default">
+                        Choose File <input type="file" id="FileUpload1">
+                    </label>
+                </div>
+            </div>
+            <br />
+            <br />
+            @if (Model.isEdit)
+            {
+                <button id="add-shoe" class="btn btn-danger col-xs-12 col-md-3 col-lg-2">Update</button>
+
+            }
+            else
+            {
+                <button id="add-shoe" class="btn btn-danger col-xs-12 col-md-3 col-lg-2">Submit</button>
+
+            }
+            <br />
+            <br />
+            <br />
+        </div>
+        <div id="menu1" class="tab-pane fade in">
+            @{
+                Html.RenderAction("ShoeTrackerHistory", "Home");
+            }
+        </div>
+        <div id="monthly-budget" class="tab-pane fade in">
+            <br />
+            <div class="row">
+                <div class="col-lg-6">
+                    <p>Enter Category: <br /><select class="form-control"><option value="food">Food</option><option value="gas">Gas</option><option value="shopping">Shopping</option></select></p>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-lg-6">
+                    <p>Enter Amount: <input type="text" class="form-control" /></p>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-lg-3">
+                    @Html.ActionLink("Submit", "InsertBudgetValue", "Home", new { @class="btn btn-primary"})
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    @{
+                        Html.RenderAction("GetMonthlyBudget", "Home");
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var isDelete = '@Model.isDelete';
+    if (isDelete === 'True') {
+        $('#myTab a[href="#menu1"]').tab('show');
+    }
+    $(document)
+        .ready(function () {
+            $('#add-shoe')
+                .on('click',
+                    function () {
+                        debugger;
+                        var name = $('#name').val();
+                        var shoeType = $('#shoe-type').val();
+                        var price = $('#price').val();
+                        var size = $('#size').val();
+                        var link = $('#link').val();
+                        var date = $('#date').val();
+                        var fileUpload = $("#FileUpload1").get(0);
+                        var files = fileUpload.files;
+                        var id = '@Model.Id';
+                        var isEdit = '@Model.isEdit';
+
+                        // Create FormData object
+                        var fileData = new FormData();
+
+                        // Looping over all files and add it to FormData object
+                        for (var i = 0; i < files.length; i++) {
+                            fileData.append(files[i].name, files[i]);
+                        }
+                        $.ajax({
+                            type: 'POST',
+                            cache: false,
+                            data: {
+                                ChildName: name,
+                                ShoeTypeId: shoeType,
+                                Price: price,
+                                Size: size,
+                                Link: link,
+                                Date: date,
+                                Id: id
+                            },
+                            url: determineUrl(),
+                            success: function (id) {
+                                UploadFile(id);
+
+                            },
+                            error: function (request, status, error) {
+                                console.log(error);
+                            }
+                        });
+
+                        function UploadFile(id) {
+                            if (id != null) {
+                                fileData.append("id", id);
+                                $.ajax({
+                                    type: "POST",
+                                    url: '@Url.Action("UploadFile", "Home")',
+                                    contentType: false, // Not to set any content header
+                                    processData: false, // Not to process data
+                                    data: fileData,
+                                    success: function (message) {
+                                        $('#success-message').html("<h5>" + message + "</h5>");
+                                        $("html, body").animate({ scrollTop: 0 }, 200);
+                                    },
+                                    error: function (xhr, status, error) { alert(error); }
+                                });
+                            }
+                        }
+
+                        function determineUrl() {
+                            debugger;
+                            if (isEdit === 'False') {
+                                return '@Url.Action("AddShoe", "Home")';
+                            } else {
+                                return '@Url.Action("UpdateShoe", "Home")';
+                            }
+                        }
+                    });
+        });
+
+    $('.menu11')
+        .on('click',
+            function () {
+                $('body').find('input:text').val('');
+                $('#date').val('');
+                $.ajax({
+                    type: 'POST',
+                    cache: false,
+                    url: '@Url.Action("ShoeTrackerHistory", "Home")',
+                    success: function (result) {
+                        $('#menu1').html(result);
+                    },
+                    error: function (request, status, error) {
+                        console.log(error);
+                    }
+                });
+            });
+</script>
