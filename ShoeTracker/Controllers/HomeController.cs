@@ -25,7 +25,7 @@ namespace ShoeTracker.Controllers
         /// </summary>
         [Inject]
         private IQueryDispatcher dispatcher;
-
+        //new change
         /// <summary>
         /// The command dispatcher
         /// </summary>
